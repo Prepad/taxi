@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Telegram\Bot\Laravel\Facades\Telegram;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,11 +19,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('test', function (Request $request)
-{
-    $telegraph = \DefStudio\Telegraph\Models\TelegraphBot::fromId(1);
-    $telegraph->registerWebhook()->send();
-    return 123;
+Route::post('/hzrudblhluiofccyoytcbfszaedaipbbiltftizmqolbdwqlfx/webhook', function () {
+    $update = Telegram::commandsHandler(true);
+    return response('ok', 200);
 });
+
+
 
 
