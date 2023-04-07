@@ -2,7 +2,9 @@
 
 namespace App\Telegram\Commands;
 
-use Illuminate\Support\Facades\Log;
+use App\Services\TgKeyboard\TgKeyboardService;
+use App\Services\TgUser\TgUserService;
+use App\Telegram\Enum\ButtonsEnum;
 use Telegram\Bot\Commands\Command;
 use Telegram;
 
@@ -33,10 +35,29 @@ class StartCommand extends Command
 
     {
         $response = $this->getUpdate();
-        $text = 'Hey stranger, thanks for visiting me.'.chr(10).chr(10);
-        $text .= 'I am a bot and working for'.chr(10);
-        $text .= env('APP_URL').chr(10).chr(10);
-        $text .= 'Please come and visit me there.'.chr(10);
-        $this->replyWithMessage(compact('text'));
+        $tgUserService = new TgUserService();
+        $id = $response->getChat()->id;
+        $tgUserService->userIsExist($id);
+        if ($this->update->has('callbackQuery')) {
+            $callback = $this->update->callbackQuery->data;
+        } else {
+            $response = '';
+            $commands = $this->getTelegram()->getCommands();
+            foreach ($commands as $name => $command) {
+                $response .= sprintf('/%s - %s' . PHP_EOL, $name, $command->getDescription());
+            }
+            $keyboard = [
+                'inline_keyboard' => [
+                    [
+                        ButtonsEnum::mainMenu()->getData(),
+                    ]
+                ],
+                'one_time_keyboard' => true,
+            ];
+            $this->replyWithMessage([
+                'text' => $response,
+                'reply_markup' => json_encode($keyboard),
+            ]);
+        }
     }
 }

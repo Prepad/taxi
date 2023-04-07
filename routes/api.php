@@ -20,7 +20,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/hzrudblhluiofccyoytcbfszaedaipbbiltftizmqolbdwqlfx/webhook', function () {
-    $update = Telegram::commandsHandler(true);
+    $update = Telegram::getWebhookUpdate();
+    if ($update->has('callback_query')) {
+        $callback = $update->callbackQuery->data;
+        Telegram::triggerCommand(trim($callback, "/"), $update);
+        return response('ok', 200);
+    }
+    $updates = Telegram::commandsHandler(true);
     return response('ok', 200);
 });
 
